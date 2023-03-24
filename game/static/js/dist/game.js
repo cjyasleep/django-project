@@ -273,12 +273,13 @@ requestAnimationFrame(AC_GAME_ANIMATION);class GameMap extends AcGameObject {
     }
 
     update() {
-        this.spent_time += this.timedelta * 1000;
-        if (this.spent_time > 4 && Math.random() < 1 / 300.0) {
-            let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];
-            if (!this.is_me) {
-                this.shoot_fireball(player.x, player.y);
-            }
+        this.spent_time += this.timedelta / 1000;
+        if (!this.is_me && this.spent_time > 3 && Math.random() < 1 / 300.0) {
+            let player = this.playground.players[0];
+            // let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];
+            let tx = player.x + player.speed * this.vx * this.timedelta / 1000 * 0.3;
+            let ty = player.y + player.speed + this.vy * this.timedelta / 1000 * 0.3;
+            this.shoot_fireball(tx, ty);
         }
         if (this.damage_speed > 10) {
             this.vx = this.vy = 0;
@@ -310,6 +311,14 @@ requestAnimationFrame(AC_GAME_ANIMATION);class GameMap extends AcGameObject {
         this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
+    }
+
+    on_destroy() {
+        for (let i = 0; i < this.playground.players.length; i++) {
+            if (this.playground.players[i] === this) {
+                this.playground.players.splice(i, 1);
+            }
+        }
     }
 }class FireBall extends AcGameObject {
     constructor(playground, player, x, y, radius, vx, vy, color, speed, move_length, damage) {
